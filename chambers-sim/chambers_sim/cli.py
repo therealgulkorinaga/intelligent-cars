@@ -6,9 +6,9 @@ import asyncio
 import json
 import math
 import random
-import sys
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
 import click
 import structlog
@@ -119,7 +119,7 @@ def carla(
 
     async def run() -> None:
         await adapter.connect()
-        session_id = await adapter.start_session("carla-ego")
+        await adapter.start_session("carla-ego")
         gw_session = await client.start_session("carla-ego", manifest)
 
         adapter.setup_ego_vehicle()

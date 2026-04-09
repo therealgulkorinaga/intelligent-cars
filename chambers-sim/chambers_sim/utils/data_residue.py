@@ -7,14 +7,13 @@ the reduction in data exposure per stakeholder and per category.
 from __future__ import annotations
 
 import json
-import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 import structlog
 
-from chambers_sim.models.data_record import DataRecord, DataType, FilteredDataRecord
+from chambers_sim.models.data_record import DataRecord, FilteredDataRecord
 from chambers_sim.models.manifest import PreservationManifest
 from chambers_sim.utils.local_gateway import LocalGateway
 

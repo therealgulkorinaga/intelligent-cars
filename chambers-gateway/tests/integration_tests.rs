@@ -99,19 +99,28 @@ fn test_session_lifecycle() {
     // Process several records
     let speed = make_speed_record(sid.clone());
     let result = gw.process_record(&sid, &speed).unwrap();
-    assert!(!result.records_transmitted.is_empty(), "Speed should be transmitted to at least OEM");
+    assert!(
+        !result.records_transmitted.is_empty(),
+        "Speed should be transmitted to at least OEM"
+    );
 
     let position = make_position_record(sid.clone());
     let result = gw.process_record(&sid, &position).unwrap();
     assert!(
-        result.records_transmitted.iter().any(|r| r.stakeholder_id == "oem-cloud"),
+        result
+            .records_transmitted
+            .iter()
+            .any(|r| r.stakeholder_id == "oem-cloud"),
         "OEM should receive position data"
     );
 
     let behaviour = make_driving_behaviour_record(sid.clone());
     let result = gw.process_record(&sid, &behaviour).unwrap();
     assert!(
-        result.records_transmitted.iter().any(|r| r.stakeholder_id == "insurer-api"),
+        result
+            .records_transmitted
+            .iter()
+            .any(|r| r.stakeholder_id == "insurer-api"),
         "Insurer should receive driving behaviour"
     );
 
@@ -121,8 +130,15 @@ fn test_session_lifecycle() {
 
     let receipt = gw.end_session(&sid).unwrap();
     assert!(receipt.overall_success, "Burn should succeed");
-    assert_eq!(receipt.layers_completed.len(), 6, "All 6 layers should execute");
-    assert!(!gw.is_session_active(&sid), "Session should be gone after burn");
+    assert_eq!(
+        receipt.layers_completed.len(),
+        6,
+        "All 6 layers should execute"
+    );
+    assert!(
+        !gw.is_session_active(&sid),
+        "Session should be gone after burn"
+    );
 
     // Verify key is destroyed — cannot encrypt any more
     let hsm = gw.hsm();
@@ -182,7 +198,10 @@ fn test_manifest_evaluation() {
     let behaviour = make_driving_behaviour_record(sid.clone());
     let results = evaluator.evaluate(&behaviour).unwrap();
     let insurer = results.iter().find(|(id, _)| id.0 == "insurer-api");
-    assert!(insurer.is_some(), "Insurer should receive driving behaviour");
+    assert!(
+        insurer.is_some(),
+        "Insurer should receive driving behaviour"
+    );
     let (_, filtered) = insurer.unwrap();
     assert_eq!(filtered.granularity, Granularity::PerTripScore);
     // Per-trip score collapses everything to a single score
@@ -532,9 +551,7 @@ fn test_hsm_fallback() {
         "Data should be blocked in fallback mode"
     );
     assert!(
-        result.records_blocked[0]
-            .reason
-            .contains("fallback"),
+        result.records_blocked[0].reason.contains("fallback"),
         "Block reason should mention fallback"
     );
 
@@ -790,8 +807,8 @@ fn test_audit_export_json() {
     let export = gw.audit_log().export_session(&sid).unwrap();
 
     // Parse as JSON — should not fail
-    let parsed: serde_json::Value = serde_json::from_str(&export)
-        .expect("Audit export should be valid JSON");
+    let parsed: serde_json::Value =
+        serde_json::from_str(&export).expect("Audit export should be valid JSON");
 
     assert!(parsed.get("session_id").is_some());
     assert!(parsed.get("entry_count").is_some());

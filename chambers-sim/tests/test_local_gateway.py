@@ -427,10 +427,6 @@ class TestDataResidueReduction:
 
         # Camera frames should be fully blocked for all stakeholders
         # (no stakeholder declares CameraFrame in the demo manifest)
-        camera_stakeholder_bytes = 0
-        for sh in report.per_stakeholder:
-            # Camera frames contribute to baseline but not chambers
-            pass
         assert report.total_bytes_chambers < report.total_bytes_baseline
 
     def test_analyzer_with_all_blocked_data(self):

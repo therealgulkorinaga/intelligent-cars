@@ -111,7 +111,9 @@ impl DataCategory {
                 DataCategory::Telemetry
             }
             DataType::SensorHealth | DataType::DiagnosticCode => DataCategory::Diagnostics,
-            DataType::DrivingBehaviour | DataType::BrakeEvent | DataType::SteeringAngle
+            DataType::DrivingBehaviour
+            | DataType::BrakeEvent
+            | DataType::SteeringAngle
             | DataType::ThrottlePosition => DataCategory::Insurance,
             DataType::CameraFrame | DataType::LidarCloud => DataCategory::Media,
             DataType::V2xCam => DataCategory::V2x,
@@ -120,7 +122,9 @@ impl DataCategory {
                 DataCategory::PersonalIdentifiable
             }
             DataType::AirbagStatus | DataType::SeatbeltStatus => DataCategory::Safety,
-            DataType::FuelLevel | DataType::BatteryState | DataType::TirePressure
+            DataType::FuelLevel
+            | DataType::BatteryState
+            | DataType::TirePressure
             | DataType::AmbientTemperature => DataCategory::Telemetry,
             DataType::Custom(_) => DataCategory::Telemetry,
         }

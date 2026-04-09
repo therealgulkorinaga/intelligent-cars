@@ -44,26 +44,6 @@ impl std::fmt::Display for EventType {
     }
 }
 
-impl EventType {
-    pub fn from_str(s: &str) -> Self {
-        match s {
-            "SessionStart" => EventType::SessionStart,
-            "SessionEnd" => EventType::SessionEnd,
-            "DataGenerated" => EventType::DataGenerated,
-            "DataTransmitted" => EventType::DataTransmitted,
-            "DataBlocked" => EventType::DataBlocked,
-            "BurnStarted" => EventType::BurnStarted,
-            "BurnCompleted" => EventType::BurnCompleted,
-            "ConsentRevoked" => EventType::ConsentRevoked,
-            "ManifestLoaded" => EventType::ManifestLoaded,
-            "JurisdictionBlocked" => EventType::JurisdictionBlocked,
-            "HsmFallback" => EventType::HsmFallback,
-            "PolicyViolation" => EventType::PolicyViolation,
-            _ => EventType::PolicyViolation, // fallback
-        }
-    }
-}
-
 // ── Audit entry ────────────────────────────────────────────────────────
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -343,8 +323,8 @@ impl AuditLog {
         let summary = self.get_session_summary(session_id)?;
 
         let mut lines = Vec::new();
-        lines.push(format!("Your Driving Session Summary"));
-        lines.push(format!("============================"));
+        lines.push("Your Driving Session Summary".to_string());
+        lines.push("============================".to_string());
         lines.push(format!("Session: {}", summary.session_id));
         lines.push(String::new());
 

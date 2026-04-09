@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-import asyncio
-import types
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -17,7 +15,6 @@ from chambers_sim.adapters.sumo_adapter import (
     VAR_ROUTE_ID,
     VAR_SPEED,
     SumoAdapter,
-    VehicleSessionState,
     anonymise_position,
     driving_behaviour_score,
 )

@@ -96,12 +96,14 @@ impl ManifestEvaluator {
         &self,
         record: &DataRecord,
     ) -> Result<Vec<(StakeholderId, FilteredDataRecord)>> {
-        let manifest = self.manifest.lock().map_err(|e| {
-            ChambersError::Manifest(format!("Failed to lock manifest: {}", e))
-        })?;
-        let revocations = self.revocations.lock().map_err(|e| {
-            ChambersError::Manifest(format!("Failed to lock revocations: {}", e))
-        })?;
+        let manifest = self
+            .manifest
+            .lock()
+            .map_err(|e| ChambersError::Manifest(format!("Failed to lock manifest: {}", e)))?;
+        let revocations = self
+            .revocations
+            .lock()
+            .map_err(|e| ChambersError::Manifest(format!("Failed to lock revocations: {}", e)))?;
 
         let mut results = Vec::new();
 
@@ -125,13 +127,15 @@ impl ManifestEvaluator {
             };
 
             // Jurisdiction check: stakeholder endpoint must be in declared jurisdictions
-            if !category.jurisdiction.contains(&stakeholder.endpoint_jurisdiction) {
+            if !category
+                .jurisdiction
+                .contains(&stakeholder.endpoint_jurisdiction)
+            {
                 continue; // jurisdiction mismatch — block
             }
 
             // Build filtered fields
-            let filtered_fields =
-                Self::filter_fields(&record.fields, &category);
+            let filtered_fields = Self::filter_fields(&record.fields, category);
 
             // Apply granularity
             let final_fields =
@@ -158,9 +162,10 @@ impl ManifestEvaluator {
         data_type: &DataType,
         target_jurisdiction: &Jurisdiction,
     ) -> Result<bool> {
-        let manifest = self.manifest.lock().map_err(|e| {
-            ChambersError::Manifest(format!("Failed to lock manifest: {}", e))
-        })?;
+        let manifest = self
+            .manifest
+            .lock()
+            .map_err(|e| ChambersError::Manifest(format!("Failed to lock manifest: {}", e)))?;
 
         for stakeholder in &manifest.stakeholders {
             if stakeholder.id == stakeholder_id {
@@ -176,9 +181,10 @@ impl ManifestEvaluator {
 
     /// Revoke consent for a stakeholder. Returns the timestamp of revocation.
     pub fn revoke_consent(&self, stakeholder_id: &StakeholderId) -> Result<DateTime<Utc>> {
-        let manifest = self.manifest.lock().map_err(|e| {
-            ChambersError::Manifest(format!("Failed to lock manifest: {}", e))
-        })?;
+        let manifest = self
+            .manifest
+            .lock()
+            .map_err(|e| ChambersError::Manifest(format!("Failed to lock manifest: {}", e)))?;
 
         // Verify stakeholder exists
         let exists = manifest
@@ -187,17 +193,16 @@ impl ManifestEvaluator {
             .any(|s| s.id == stakeholder_id.0);
 
         if !exists {
-            return Err(ChambersError::StakeholderNotFound(
-                stakeholder_id.0.clone(),
-            ));
+            return Err(ChambersError::StakeholderNotFound(stakeholder_id.0.clone()));
         }
 
         drop(manifest);
 
         let now = Utc::now();
-        let mut revocations = self.revocations.lock().map_err(|e| {
-            ChambersError::Manifest(format!("Failed to lock revocations: {}", e))
-        })?;
+        let mut revocations = self
+            .revocations
+            .lock()
+            .map_err(|e| ChambersError::Manifest(format!("Failed to lock revocations: {}", e)))?;
 
         // Don't double-revoke
         if !revocations
@@ -353,17 +358,13 @@ impl ManifestEvaluator {
             Granularity::PerTripScore => {
                 // Collapse all numeric fields into a single aggregate score.
                 // Score = average of all numeric values, clamped to 0..100.
-                let numeric_values: Vec<f64> = fields
-                    .values()
-                    .filter_map(|v| v.as_f64())
-                    .collect();
+                let numeric_values: Vec<f64> = fields.values().filter_map(|v| v.as_f64()).collect();
 
                 let score = if numeric_values.is_empty() {
                     50.0 // default neutral score
                 } else {
-                    let avg: f64 =
-                        numeric_values.iter().sum::<f64>() / numeric_values.len() as f64;
-                    avg.max(0.0).min(100.0)
+                    let avg: f64 = numeric_values.iter().sum::<f64>() / numeric_values.len() as f64;
+                    avg.clamp(0.0, 100.0)
                 };
 
                 let mut result = HashMap::new();
@@ -452,10 +453,7 @@ pub fn demo_manifest(vehicle_id: &str) -> PreservationManifest {
                     },
                     CategoryDeclaration {
                         data_type: DataType::Speed,
-                        fields: Some(vec![
-                            "avg_speed".to_string(),
-                            "max_speed".to_string(),
-                        ]),
+                        fields: Some(vec!["avg_speed".to_string(), "max_speed".to_string()]),
                         excluded_fields: None,
                         granularity: Granularity::Aggregated,
                         retention: "P90D".to_string(),

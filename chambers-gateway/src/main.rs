@@ -193,12 +193,7 @@ fn run_demo() {
     fields.insert("avg_speed".into(), serde_json::json!(72.5));
     fields.insert("max_speed".into(), serde_json::json!(118.3));
     fields.insert("driver_id".into(), serde_json::json!("DRV-DEMO-001"));
-    let record = DataRecord::new(
-        session_id.clone(),
-        "speed-sensor",
-        DataType::Speed,
-        fields,
-    );
+    let record = DataRecord::new(session_id.clone(), "speed-sensor", DataType::Speed, fields);
     let result = gw.process_record(&session_id, &record).unwrap();
     println!(
         "    Transmitted to: {:?}",
@@ -278,12 +273,7 @@ fn run_demo() {
     fields.insert("speed_at_trigger".into(), serde_json::json!(45.2));
     fields.insert("driver_id".into(), serde_json::json!("DRV-DEMO-001"));
     fields.insert("vin".into(), serde_json::json!("VIN-DEMO-2026-001"));
-    let record = DataRecord::new(
-        session_id.clone(),
-        "adas-ecu",
-        DataType::AdasEvent,
-        fields,
-    );
+    let record = DataRecord::new(session_id.clone(), "adas-ecu", DataType::AdasEvent, fields);
     let result = gw.process_record(&session_id, &record).unwrap();
     println!(
         "    Transmitted to: {:?}",
@@ -329,12 +319,7 @@ fn run_demo() {
     let mut fields = HashMap::new();
     fields.insert("avg_speed".into(), serde_json::json!(85.0));
     fields.insert("max_speed".into(), serde_json::json!(95.0));
-    let record = DataRecord::new(
-        session_id.clone(),
-        "speed-sensor",
-        DataType::Speed,
-        fields,
-    );
+    let record = DataRecord::new(session_id.clone(), "speed-sensor", DataType::Speed, fields);
     let result = gw.process_record(&session_id, &record).unwrap();
     let insurer_got_data = result
         .records_transmitted
@@ -381,10 +366,7 @@ fn run_demo() {
 
     // Show audit summary
     println!("[11] Audit Summary:");
-    let summary = gw
-        .audit_log()
-        .get_session_summary(&session_id)
-        .unwrap();
+    let summary = gw.audit_log().get_session_summary(&session_id).unwrap();
     println!("     Total events:         {}", summary.total_events);
     println!("     Data generated:       {}", summary.data_generated);
     println!("     Data transmitted:     {}", summary.data_transmitted);
@@ -396,10 +378,7 @@ fn run_demo() {
 
     // Verify HMAC chain
     println!("[12] Verifying HMAC chain integrity...");
-    let chain_ok = gw
-        .audit_log()
-        .verify_chain(&session_id)
-        .unwrap();
+    let chain_ok = gw.audit_log().verify_chain(&session_id).unwrap();
     println!(
         "     Chain integrity: {}",
         if chain_ok { "VERIFIED" } else { "BROKEN" }
@@ -409,10 +388,7 @@ fn run_demo() {
     // Driver summary
     println!("[13] Driver Summary (human-readable):");
     println!("-------------------------------------");
-    let driver_summary = gw
-        .audit_log()
-        .get_driver_summary(&session_id)
-        .unwrap();
+    let driver_summary = gw.audit_log().get_driver_summary(&session_id).unwrap();
     println!("{}", driver_summary);
     println!();
 

@@ -31,7 +31,7 @@ impl NonceSequence for SingleNonce {
     fn advance(&mut self) -> std::result::Result<Nonce, ring::error::Unspecified> {
         self.0
             .take()
-            .map(|n| Nonce::assume_unique_for_key(n))
+            .map(Nonce::assume_unique_for_key)
             .ok_or(ring::error::Unspecified)
     }
 }
@@ -71,7 +71,10 @@ impl SoftwareHsm {
     /// Generate a new AES-256 key. Returns the handle; the raw key material
     /// never leaves the HSM.
     pub fn generate_key(&self) -> Result<(KeyHandle, ())> {
-        let mut inner = self.inner.lock().map_err(|e| ChambersError::Hsm(e.to_string()))?;
+        let mut inner = self
+            .inner
+            .lock()
+            .map_err(|e| ChambersError::Hsm(e.to_string()))?;
         let mut key_bytes = vec![0u8; 32]; // AES-256
         inner
             .rng
@@ -86,7 +89,10 @@ impl SoftwareHsm {
     /// Encrypt plaintext using the key referenced by `handle`.
     /// Returns nonce + ciphertext (with GCM tag appended).
     pub fn encrypt(&self, handle: KeyHandle, plaintext: &[u8]) -> Result<CipherText> {
-        let inner = self.inner.lock().map_err(|e| ChambersError::Hsm(e.to_string()))?;
+        let inner = self
+            .inner
+            .lock()
+            .map_err(|e| ChambersError::Hsm(e.to_string()))?;
         let key_bytes = match inner.keys.get(&handle) {
             Some(KeyState::Active(bytes)) => bytes.clone(),
             Some(KeyState::Destroyed) => return Err(ChambersError::KeyDestroyed(handle)),
@@ -122,7 +128,10 @@ impl SoftwareHsm {
 
     /// Decrypt ciphertext using the key referenced by `handle`.
     pub fn decrypt(&self, handle: KeyHandle, ct: &CipherText) -> Result<Vec<u8>> {
-        let inner = self.inner.lock().map_err(|e| ChambersError::Hsm(e.to_string()))?;
+        let inner = self
+            .inner
+            .lock()
+            .map_err(|e| ChambersError::Hsm(e.to_string()))?;
         let key_bytes = match inner.keys.get(&handle) {
             Some(KeyState::Active(bytes)) => bytes.clone(),
             Some(KeyState::Destroyed) => return Err(ChambersError::KeyDestroyed(handle)),
@@ -153,7 +162,10 @@ impl SoftwareHsm {
     /// Destroy the key: zero out all key material and remove from the store.
     /// After this call, encrypt/decrypt with this handle will return Err.
     pub fn destroy_key(&self, handle: KeyHandle) -> Result<DestructionReceipt> {
-        let mut inner = self.inner.lock().map_err(|e| ChambersError::Hsm(e.to_string()))?;
+        let mut inner = self
+            .inner
+            .lock()
+            .map_err(|e| ChambersError::Hsm(e.to_string()))?;
         match inner.keys.get_mut(&handle) {
             Some(state @ KeyState::Active(_)) => {
                 // Zero out key material
@@ -182,7 +194,10 @@ impl SoftwareHsm {
 
     /// Check whether a key handle is currently active.
     pub fn is_key_active(&self, handle: KeyHandle) -> Result<bool> {
-        let inner = self.inner.lock().map_err(|e| ChambersError::Hsm(e.to_string()))?;
+        let inner = self
+            .inner
+            .lock()
+            .map_err(|e| ChambersError::Hsm(e.to_string()))?;
         match inner.keys.get(&handle) {
             Some(KeyState::Active(_)) => Ok(true),
             Some(KeyState::Destroyed) => Ok(false),

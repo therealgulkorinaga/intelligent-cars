@@ -247,10 +247,7 @@ impl BurnEngine {
             layer_number: 3,
             success: true,
             duration_ms: duration,
-            details: format!(
-                "Overwrote {} data entries with random bytes",
-                count
-            ),
+            details: format!("Overwrote {} data entries with random bytes", count),
         }
     }
 
@@ -314,7 +311,10 @@ impl BurnEngine {
         // Check layers 1-5 reported success
         for layer in previous_layers {
             if !layer.success {
-                checks.push(format!("FAIL: Layer {} did not succeed", layer.layer_number));
+                checks.push(format!(
+                    "FAIL: Layer {} did not succeed",
+                    layer.layer_number
+                ));
                 all_passed = false;
             } else {
                 checks.push(format!("OK: Layer {} succeeded", layer.layer_number));

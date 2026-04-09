@@ -155,8 +155,7 @@ impl Gateway {
         let (key_handle, _) = self.hsm.generate_key()?;
 
         // Register with burn engine
-        self.burn_engine
-            .register_session(&session_id, key_handle);
+        self.burn_engine.register_session(&session_id, key_handle);
 
         // Create session state
         let state = SessionState {
@@ -295,16 +294,10 @@ impl Gateway {
 
         for (stakeholder_id, filtered_record) in &evaluator_results {
             // Check if stakeholder has a known endpoint
-            if !self
-                .stakeholder_endpoints
-                .contains_key(&stakeholder_id.0)
-            {
+            if !self.stakeholder_endpoints.contains_key(&stakeholder_id.0) {
                 blocked.push(BlockRecord {
                     category: category.to_string(),
-                    reason: format!(
-                        "Unknown stakeholder endpoint: {}",
-                        stakeholder_id
-                    ),
+                    reason: format!("Unknown stakeholder endpoint: {}", stakeholder_id),
                 });
 
                 self.audit_log.log_event(
@@ -534,10 +527,7 @@ mod tests {
 
         // Process a speed record
         let mut fields = HashMap::new();
-        fields.insert(
-            "avg_speed".into(),
-            serde_json::json!(72.5),
-        );
+        fields.insert("avg_speed".into(), serde_json::json!(72.5));
         let record = DataRecord::new(sid.clone(), "speed-sensor", DataType::Speed, fields);
         let result = gw.process_record(&sid, &record).unwrap();
         assert!(!result.records_transmitted.is_empty());

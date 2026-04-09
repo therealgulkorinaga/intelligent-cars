@@ -2,7 +2,6 @@
 
 from datetime import datetime, timezone
 
-import pytest
 
 from chambers_sim.models.data_record import (
     BurnReceipt,
@@ -341,7 +340,6 @@ class TestPreservationManifest:
     def test_from_file(self, tmp_path):
         manifest = PreservationManifest.default_demo_manifest()
         path = tmp_path / "manifest.json"
-        import json
         path.write_text(manifest.model_dump_json(indent=2))
 
         loaded = PreservationManifest.from_file(path)

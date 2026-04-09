@@ -23,7 +23,7 @@ from chambers_sim.models.data_record import (
     ProcessingResult,
     SessionSummary,
 )
-from chambers_sim.models.manifest import PreservationManifest, StakeholderDeclaration
+from chambers_sim.models.manifest import PreservationManifest
 
 logger = structlog.get_logger(__name__)
 
