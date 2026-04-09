@@ -10,7 +10,7 @@ jobs:
     name: Rust (chambers-gateway)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.2.2
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:
@@ -32,8 +32,8 @@ jobs:
     name: Python (chambers-sim)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-python@v5.4.0
         with:
           python-version: '3.11'
       - name: Install chambers-sim
@@ -50,8 +50,8 @@ jobs:
     name: Mock Stakeholders
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-python@v5.4.0
         with:
           python-version: '3.11'
       - name: Install
@@ -66,12 +66,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: [rust, python, mock-stakeholders]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.2.2
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: chambers-gateway
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5.4.0
         with:
           python-version: '3.11'
       - name: Build gateway
@@ -79,7 +79,7 @@ jobs:
         working-directory: chambers-gateway
       - name: Install Python packages
         run: |
-          pip install -e chambers-sim/
-          pip install -e mock-stakeholders/
+          pip install -e "chambers-sim/[dev]"
+          pip install -e "mock-stakeholders/[dev]"
       - name: Run integration tests
         run: pytest tests/integration/ -v --tb=short
