@@ -1,0 +1,160 @@
+# Chambers Gazebo ECU Simulation Parameters
+#
+# Shared configuration for all ECU simulator nodes and the gateway bridge.
+# Override per-node values by passing them as launch arguments or by
+# editing the relevant section below.
+
+# Global settings applied to all nodes via /** namespace
+/**:
+  ros__parameters:
+    # Vehicle identification
+    vehicle_id: "gz-vehicle-001"
+    vehicle_vin: "WBA00000000000001"  # Pseudonymised in production
+
+    # Simulation timing
+    sim_step_size: 0.001   # Gazebo physics step (seconds)
+    real_time_factor: 1.0
+
+    # Chambers gateway connection
+    gateway_url: "http://localhost:8080"
+    gateway_timeout_ms: 5000
+    gateway_retry_count: 3
+
+    # Preservation manifest
+    manifest_file: "../../manifests/demo_manifest.json"
+
+    # Privacy and data handling
+    enable_privacy_filter: true
+    enable_burn_on_session_end: true
+    pseudonym_rotation_interval_s: 300
+
+# Powertrain ECU
+powertrain_ecu:
+  ros__parameters:
+    ecu_name: "powertrain"
+    ecu_domain: "powertrain"
+    publish_rate_hz: 10.0
+    signals:
+      - engine_rpm
+      - engine_torque_nm
+      - throttle_position
+      - transmission_gear
+      - fuel_level_pct
+      - coolant_temp_c
+      - oil_pressure_kpa
+      - battery_voltage_v
+    # Signal simulation ranges
+    engine_rpm_range: [800.0, 6500.0]
+    engine_torque_range: [0.0, 350.0]
+    throttle_range: [0.0, 100.0]
+    gear_range: [0, 8]
+    fuel_range: [0.0, 100.0]
+    coolant_temp_range: [60.0, 110.0]
+    oil_pressure_range: [150.0, 450.0]
+    battery_voltage_range: [11.5, 14.8]
+    # DTC generation probability per second
+    dtc_probability: 0.001
+
+# Body Control ECU
+body_ecu:
+  ros__parameters:
+    ecu_name: "body"
+    ecu_domain: "body_control"
+    publish_rate_hz: 2.0
+    signals:
+      - door_lock_status
+      - window_position_pct
+      - headlight_state
+      - wiper_state
+      - exterior_temp_c
+      - cabin_temp_c
+      - hvac_mode
+      - seatbelt_status
+    exterior_temp_range: [-20.0, 45.0]
+    cabin_temp_range: [15.0, 35.0]
+    dtc_probability: 0.0005
+
+# ADAS ECU
+adas_ecu:
+  ros__parameters:
+    ecu_name: "adas"
+    ecu_domain: "advanced_driver_assist"
+    publish_rate_hz: 20.0
+    signals:
+      - lane_departure_warning
+      - forward_collision_warning
+      - blind_spot_detection
+      - adaptive_cruise_target_speed
+      - adaptive_cruise_distance_m
+      - aeb_status
+      - lane_keep_assist_active
+      - traffic_sign_detected
+    # ADAS event generation
+    sealed_event_probability: 0.0002  # per tick, ~1 event per 25 seconds at 20 Hz
+    sealed_event_window_before_s: 5.0
+    sealed_event_window_after_s: 2.0
+    dtc_probability: 0.001
+
+# Infotainment ECU
+infotainment_ecu:
+  ros__parameters:
+    ecu_name: "infotainment"
+    ecu_domain: "infotainment"
+    publish_rate_hz: 1.0
+    signals:
+      - media_source
+      - volume_level
+      - navigation_active
+      - bluetooth_connected_devices
+      - voice_command_active
+      - display_brightness
+      - phone_projection_mode
+      - wifi_hotspot_clients
+    # These signals contain personal data -- manifest controls what is forwarded
+    personal_data_signals:
+      - bluetooth_connected_devices
+      - voice_command_active
+      - phone_projection_mode
+    dtc_probability: 0.0003
+
+# Telematics ECU
+telematics_ecu:
+  ros__parameters:
+    ecu_name: "telematics"
+    ecu_domain: "telematics_connectivity"
+    publish_rate_hz: 5.0
+    signals:
+      - cellular_signal_strength_dbm
+      - data_usage_mb
+      - ota_update_status
+      - v2x_cam_broadcast_active
+      - remote_diagnostics_session
+      - geofence_status
+      - ecall_status
+      - gnss_fix_quality
+    cellular_signal_range: [-120.0, -50.0]
+    dtc_probability: 0.0005
+
+# Chambers Gateway Bridge
+chambers_gateway_bridge:
+  ros__parameters:
+    ingest_rate_hz: 10.0
+    batch_size: 50
+    enable_privacy_filter: true
+    enable_burn_on_session_end: true
+    # Which data types to forward (others are dropped at source)
+    forward_data_types:
+      - Speed
+      - Acceleration
+      - Position
+      - GnssPosition
+      - ImuReading
+      - SensorHealth
+      - DrivingBehaviour
+      - DiagnosticCode
+      - SealedEvent
+      - CameraFrame
+      - LidarCloud
+    # Stakeholder routing is determined by the manifest, but these
+    # overrides can block specific stakeholders for testing
+    blocked_stakeholders: []

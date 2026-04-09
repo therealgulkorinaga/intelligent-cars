@@ -1,0 +1,54 @@
+services:
+  gateway:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.gateway
+    command: ["gateway"]
+    volumes:
+      - gateway-data:/data
+    networks:
+      - chambers
+
+  stakeholders:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.stakeholders
+    ports:
+      - "8000:8000"
+    networks:
+      - chambers
+
+  carla:
+    image: carlasim/carla:0.9.15
+    privileged: true
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    runtime: nvidia
+    ports:
+      - "2000:2000"
+      - "2001:2001"
+    command: ["/bin/bash", "-c", "./CarlaUE4.sh -RenderOffScreen -nosound"]
+    networks:
+      - chambers
+
+  sim:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.sim
+    command: ["carla", "--host", "carla", "--port", "2000", "--duration", "300"]
+    depends_on:
+      - gateway
+      - stakeholders
+      - carla
+    environment:
+      - GATEWAY_URL=http://gateway:8080
+      - STAKEHOLDERS_URL=http://stakeholders:8000
+    networks:
+      - chambers
+
+volumes:
+  gateway-data:
+
+networks:
+  chambers:
+    driver: bridge

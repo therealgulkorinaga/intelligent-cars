@@ -1,0 +1,28 @@
+[package]
+name = "chambers-gateway"
+version = "0.1.0"
+edition = "2021"
+description = "Chambers Automotive Simulation Testbed - Vehicle Data Sovereignty Gateway"
+license = "MIT"
+
+[[bin]]
+name = "chambers"
+path = "src/main.rs"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+uuid = { version = "1", features = ["v4", "serde"] }
+ring = "0.17"
+chrono = { version = "0.4", features = ["serde"] }
+rusqlite = { version = "0.31", features = ["bundled"] }
+thiserror = "1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+clap = { version = "4", features = ["derive"] }
+hex = "0.4"
+rand = "0.8"
+
+[dev-dependencies]
+tempfile = "3"

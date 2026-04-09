@@ -1,0 +1,85 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  rust:
+    name: Rust (chambers-gateway)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: chambers-gateway
+      - name: Build
+        run: cargo build --release
+        working-directory: chambers-gateway
+      - name: Test
+        run: cargo test --release
+        working-directory: chambers-gateway
+      - name: Clippy
+        run: cargo clippy -- -D warnings
+        working-directory: chambers-gateway
+      - name: Format check
+        run: cargo fmt --check
+        working-directory: chambers-gateway
+
+  python:
+    name: Python (chambers-sim)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install chambers-sim
+        run: pip install -e ".[dev]"
+        working-directory: chambers-sim
+      - name: Lint
+        run: ruff check .
+        working-directory: chambers-sim
+      - name: Test
+        run: pytest tests/ -v --tb=short
+        working-directory: chambers-sim
+
+  mock-stakeholders:
+    name: Mock Stakeholders
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install
+        run: pip install -e ".[dev]"
+        working-directory: mock-stakeholders
+      - name: Test
+        run: pytest -v --tb=short
+        working-directory: mock-stakeholders
+
+  integration:
+    name: Integration Test (Phase 1)
+    runs-on: ubuntu-latest
+    needs: [rust, python, mock-stakeholders]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: chambers-gateway
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Build gateway
+        run: cargo build --release
+        working-directory: chambers-gateway
+      - name: Install Python packages
+        run: |
+          pip install -e chambers-sim/
+          pip install -e mock-stakeholders/
+      - name: Run integration tests
+        run: pytest tests/integration/ -v --tb=short

@@ -1,0 +1,255 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chambers.auto/schemas/preservation-manifest/v1",
+  "title": "Chambers Preservation Manifest",
+  "description": "Schema for the typed preservation manifest that governs what vehicle data may be retained, transmitted, and to whom, within a sealed drive session.",
+  "type": "object",
+  "required": [
+    "manifest_version",
+    "vehicle_id",
+    "session_id",
+    "stakeholders"
+  ],
+  "properties": {
+    "manifest_version": {
+      "type": "string",
+      "description": "Semantic version of the manifest schema.",
+      "pattern": "^\\d+\\.\\d+$",
+      "examples": ["1.0"]
+    },
+    "vehicle_id": {
+      "type": "string",
+      "description": "Pseudonymised vehicle identifier (never a raw VIN).",
+      "minLength": 1
+    },
+    "session_id": {
+      "type": "string",
+      "description": "UUID of the sealed drive session.",
+      "format": "uuid"
+    },
+    "session_start": {
+      "type": "string",
+      "description": "ISO-8601 timestamp when the session began.",
+      "format": "date-time"
+    },
+    "stakeholders": {
+      "type": "array",
+      "description": "Ordered list of stakeholders permitted to receive data from this session.",
+      "items": {
+        "$ref": "#/$defs/Stakeholder"
+      }
+    },
+    "mandatory_retention": {
+      "type": "array",
+      "description": "Data categories that MUST be retained regardless of stakeholder declarations (eCall, EDR, R155 security events).",
+      "items": {
+        "$ref": "#/$defs/MandatoryRetention"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "Stakeholder": {
+      "type": "object",
+      "description": "A single external stakeholder and the data categories they are permitted to receive.",
+      "required": [
+        "id",
+        "role",
+        "legal_basis",
+        "categories"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique stakeholder identifier (e.g. oem_volkswagen, insurer_allianz).",
+          "minLength": 1
+        },
+        "role": {
+          "type": "string",
+          "description": "Stakeholder role classification.",
+          "enum": [
+            "oem",
+            "insurer",
+            "adas_supplier",
+            "tier1_supplier",
+            "regulator",
+            "fleet_operator"
+          ]
+        },
+        "legal_basis": {
+          "type": "string",
+          "description": "GDPR Art. 6 legal basis for processing.",
+          "enum": [
+            "legitimate_interest",
+            "explicit_consent",
+            "contractual_necessity",
+            "legal_obligation",
+            "vital_interest",
+            "public_interest"
+          ]
+        },
+        "consent_ref": {
+          "type": "string",
+          "description": "Reference to the consent record when legal_basis is explicit_consent."
+        },
+        "categories": {
+          "type": "array",
+          "description": "Data categories this stakeholder is permitted to receive.",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/DataCategory"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "DataCategory": {
+      "type": "object",
+      "description": "A single data category with its constraints.",
+      "required": [
+        "type",
+        "granularity",
+        "retention",
+        "purpose",
+        "jurisdiction"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "The kind of vehicle data.",
+          "enum": [
+            "sensor_health",
+            "driving_behaviour",
+            "sealed_event",
+            "component_telemetry",
+            "diagnostic_code",
+            "gps_position",
+            "camera_frame",
+            "lidar_pointcloud",
+            "v2x_cam",
+            "bluetooth_pairing",
+            "wifi_passthrough",
+            "ecall",
+            "edr",
+            "security_event_log"
+          ]
+        },
+        "granularity": {
+          "type": "string",
+          "description": "Level of data granularity / anonymisation.",
+          "enum": [
+            "raw",
+            "anonymised",
+            "aggregated",
+            "anonymised_aggregate",
+            "per_trip_score",
+            "pseudonymised",
+            "sealed"
+          ]
+        },
+        "retention": {
+          "type": "string",
+          "description": "Maximum retention period as ISO 8601 duration or a named policy term.",
+          "pattern": "^(P(\\d+Y)?(\\d+M)?(\\d+D)?(T(\\d+H)?(\\d+M)?(\\d+S)?)?|policy_term|warranty_period|session_only)$"
+        },
+        "purpose": {
+          "type": "string",
+          "description": "Purpose limitation for this data category.",
+          "minLength": 1
+        },
+        "jurisdiction": {
+          "type": "array",
+          "description": "Permitted jurisdictions for data transfer.",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": [
+              "EU",
+              "EEA",
+              "UK",
+              "CH",
+              "adequacy_decision"
+            ]
+          }
+        },
+        "fields": {
+          "type": "array",
+          "description": "Explicit allow-list of field names within this category.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "excluded_fields": {
+          "type": "array",
+          "description": "Explicit deny-list of field names that must NOT be transmitted.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "trigger": {
+          "type": "string",
+          "description": "Event trigger condition (for sealed_event type).",
+          "enum": [
+            "safety_critical",
+            "diagnostic",
+            "periodic"
+          ]
+        },
+        "window": {
+          "type": "object",
+          "description": "Temporal capture window around the trigger (for sealed_event type).",
+          "properties": {
+            "before": {
+              "type": "string",
+              "description": "Duration before trigger (ISO 8601).",
+              "pattern": "^PT\\d+S$"
+            },
+            "after": {
+              "type": "string",
+              "description": "Duration after trigger (ISO 8601).",
+              "pattern": "^PT\\d+S$"
+            }
+          },
+          "required": ["before", "after"],
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "MandatoryRetention": {
+      "type": "object",
+      "description": "Data that must be retained by law, regardless of stakeholder preferences.",
+      "required": [
+        "type",
+        "regulation",
+        "treatment"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "The mandatory data type.",
+          "enum": [
+            "ecall",
+            "edr",
+            "security_event_log"
+          ]
+        },
+        "regulation": {
+          "type": "string",
+          "description": "The regulation requiring this retention.",
+          "minLength": 1
+        },
+        "treatment": {
+          "type": "string",
+          "description": "How Chambers treats this data.",
+          "enum": [
+            "exempt_outside_boundary",
+            "exempt_write_once_partition",
+            "declared_mandatory"
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- SUMO configuration for Chambers Automotive Simulation Testbed
+     10x10 urban grid scenario with 100 vehicles.
+
+     Run with:
+       sumo -c urban_100v.sumocfg
+       sumo-gui -c urban_100v.sumocfg  (for visualisation)
+
+     Or via TraCI (Python):
+       import traci
+       traci.start(["sumo", "-c", "urban_100v.sumocfg"])
+-->
+
+<configuration>
+    <input>
+        <net-file value="urban_grid.net.xml"/>
+        <route-files value="urban_100v.rou.xml"/>
+        <additional-files value="tls_timing.add.xml"/>
+    </input>
+
+    <time>
+        <begin value="0"/>
+        <end value="1800"/>
+        <step-length value="0.1"/>
+    </time>
+
+    <processing>
+        <!-- Disable teleporting so vehicles do not jump past deadlocks -->
+        <time-to-teleport value="-1"/>
+        <!-- Use the default Krauss car-following model -->
+        <default.carfollowmodel value="Krauss"/>
+        <!-- Enable lateral resolution for multi-lane behaviour -->
+        <lateral-resolution value="0.8"/>
+    </processing>
+
+    <routing>
+        <!-- Re-route vehicles if their planned route becomes blocked -->
+        <device.rerouting.probability value="0.3"/>
+        <device.rerouting.period value="60"/>
+    </routing>
+
+    <report>
+        <!-- Reduce console output verbosity -->
+        <verbose value="true"/>
+        <no-step-log value="true"/>
+    </report>
+
+    <output>
+        <!-- Full trajectory output for post-analysis -->
+        <fcd-output value="output/fcd_trace.xml"/>
+        <fcd-output.period value="1.0"/>
+        <!-- Trip statistics -->
+        <tripinfo-output value="output/trip_info.xml"/>
+        <!-- Emission data -->
+        <emission-output value="output/emissions.xml"/>
+    </output>
+
+    <gui_only>
+        <gui-settings-file value=""/>
+        <start value="true"/>
+    </gui_only>
+</configuration>

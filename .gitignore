@@ -1,0 +1,52 @@
+# Rust
+target/
+Cargo.lock
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+
+# SUMO generated
+scenarios/sumo/*.net.xml
+scenarios/sumo/*.rou.xml
+scenarios/sumo/*.trips.xml
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+docker/volumes/
+
+# Audit data
+*.db
+*.db-journal
+
+# SoftHSM
+/var/lib/softhsm/
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local

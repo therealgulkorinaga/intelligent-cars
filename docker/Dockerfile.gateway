@@ -1,0 +1,13 @@
+FROM rust:1.78-bookworm AS builder
+WORKDIR /app
+COPY chambers-gateway/ .
+RUN cargo build --release
+
+FROM debian:bookworm-slim
+RUN apt-get update && apt-get install -y libsqlite3-0 softhsm2 ca-certificates && rm -rf /var/lib/apt/lists/*
+COPY --from=builder /app/target/release/chambers-gateway /usr/local/bin/
+# Initialize SoftHSM
+RUN softhsm2-util --init-token --slot 0 --label "chambers" --pin 1234 --so-pin 5678
+ENV SOFTHSM2_CONF=/etc/softhsm/softhsm2.conf
+ENTRYPOINT ["chambers-gateway"]
+CMD ["demo"]

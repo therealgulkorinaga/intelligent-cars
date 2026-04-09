@@ -1,0 +1,45 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "chambers-sim"
+version = "0.1.0"
+description = "Chambers Automotive Simulation Testbed — simulator adapters for SUMO, CARLA, and ROS2"
+license = "MIT"
+requires-python = ">=3.11"
+authors = [
+    { name = "Chambers Team" },
+]
+dependencies = [
+    "traci",
+    "fastapi",
+    "uvicorn",
+    "httpx",
+    "pydantic>=2.0",
+    "structlog",
+    "click",
+    "matplotlib",
+    "numpy",
+    "rich",
+]
+
+[project.optional-dependencies]
+carla = ["carla"]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+    "pytest-cov",
+    "ruff",
+]
+
+[project.scripts]
+chambers-sim = "chambers_sim.cli:cli"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

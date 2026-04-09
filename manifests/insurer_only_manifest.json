@@ -1,0 +1,37 @@
+{
+  "manifest_version": "1.0",
+  "vehicle_id": "veh-pseudo-insurer-only-001",
+  "session_id": "c56a4180-65aa-42ec-a945-5fd21dec0538",
+  "session_start": "2026-04-08T11:00:00Z",
+  "stakeholders": [
+    {
+      "id": "insurer_allianz",
+      "role": "insurer",
+      "legal_basis": "explicit_consent",
+      "consent_ref": "consent-rec-2026-04-revoke-test",
+      "categories": [
+        {
+          "type": "driving_behaviour",
+          "fields": ["acceleration", "braking", "cornering_severity"],
+          "excluded_fields": ["gps_position", "timestamps", "route"],
+          "granularity": "per_trip_score",
+          "retention": "policy_term",
+          "purpose": "risk_model_input",
+          "jurisdiction": ["EU"]
+        }
+      ]
+    }
+  ],
+  "mandatory_retention": [
+    {
+      "type": "ecall",
+      "regulation": "EU_2015_758",
+      "treatment": "exempt_outside_boundary"
+    },
+    {
+      "type": "edr",
+      "regulation": "EU_General_Safety",
+      "treatment": "exempt_write_once_partition"
+    }
+  ]
+}

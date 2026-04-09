@@ -1,0 +1,57 @@
+services:
+  gateway:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.gateway
+    command: ["gateway"]
+    volumes:
+      - gateway-data:/data
+      - softhsm-tokens:/var/lib/softhsm/tokens
+    environment:
+      - CHAMBERS_AUDIT_DB=/data/audit.db
+      - RUST_LOG=info
+    networks:
+      - chambers
+
+  stakeholders:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.stakeholders
+    ports:
+      - "8000:8000"
+    environment:
+      - LOG_LEVEL=info
+    networks:
+      - chambers
+
+  sim:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.sim
+    command: ["demo", "--vehicles", "20", "--duration", "120"]
+    depends_on:
+      - gateway
+      - stakeholders
+    environment:
+      - GATEWAY_URL=http://gateway:8080
+      - STAKEHOLDERS_URL=http://stakeholders:8000
+    networks:
+      - chambers
+
+  sumo:
+    image: eclipse/sumo:latest
+    volumes:
+      - ../scenarios/sumo:/scenarios:ro
+    command: ["sumo", "-c", "/scenarios/urban_100v.sumocfg", "--remote-port", "8813"]
+    ports:
+      - "8813:8813"
+    networks:
+      - chambers
+
+volumes:
+  gateway-data:
+  softhsm-tokens:
+
+networks:
+  chambers:
+    driver: bridge

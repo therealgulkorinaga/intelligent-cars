@@ -1,0 +1,34 @@
+{
+  "manifest_version": "1.0",
+  "vehicle_id": "veh-pseudo-minimal-001",
+  "session_id": "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+  "session_start": "2026-04-08T10:00:00Z",
+  "stakeholders": [
+    {
+      "id": "oem_volkswagen",
+      "role": "oem",
+      "legal_basis": "legitimate_interest",
+      "categories": [
+        {
+          "type": "sensor_health",
+          "granularity": "anonymised_aggregate",
+          "retention": "P90D",
+          "purpose": "predictive_maintenance",
+          "jurisdiction": ["EU"]
+        }
+      ]
+    }
+  ],
+  "mandatory_retention": [
+    {
+      "type": "ecall",
+      "regulation": "EU_2015_758",
+      "treatment": "exempt_outside_boundary"
+    },
+    {
+      "type": "edr",
+      "regulation": "EU_General_Safety",
+      "treatment": "exempt_write_once_partition"
+    }
+  ]
+}

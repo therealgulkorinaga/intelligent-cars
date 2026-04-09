@@ -1,0 +1,96 @@
+{
+  "manifest_version": "1.0",
+  "vehicle_id": "veh-pseudo-a1b2c3d4",
+  "session_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+  "session_start": "2026-04-08T09:00:00Z",
+  "stakeholders": [
+    {
+      "id": "oem_volkswagen",
+      "role": "oem",
+      "legal_basis": "legitimate_interest",
+      "categories": [
+        {
+          "type": "sensor_health",
+          "granularity": "anonymised_aggregate",
+          "retention": "P90D",
+          "purpose": "predictive_maintenance",
+          "jurisdiction": ["EU"]
+        }
+      ]
+    },
+    {
+      "id": "insurer_allianz",
+      "role": "insurer",
+      "legal_basis": "explicit_consent",
+      "consent_ref": "consent-rec-2026-04-001",
+      "categories": [
+        {
+          "type": "driving_behaviour",
+          "fields": ["acceleration", "braking", "cornering_severity"],
+          "excluded_fields": ["gps_position", "timestamps"],
+          "granularity": "per_trip_score",
+          "retention": "policy_term",
+          "purpose": "risk_model_input",
+          "jurisdiction": ["EU"]
+        }
+      ]
+    },
+    {
+      "id": "adas_supplier_mobileye",
+      "role": "adas_supplier",
+      "legal_basis": "legitimate_interest",
+      "categories": [
+        {
+          "type": "sealed_event",
+          "trigger": "safety_critical",
+          "window": {
+            "before": "PT5S",
+            "after": "PT2S"
+          },
+          "granularity": "anonymised",
+          "retention": "P12M",
+          "purpose": "model_retraining",
+          "jurisdiction": ["EU"]
+        }
+      ]
+    },
+    {
+      "id": "tier1_bosch",
+      "role": "tier1_supplier",
+      "legal_basis": "contractual_necessity",
+      "categories": [
+        {
+          "type": "component_telemetry",
+          "granularity": "pseudonymised",
+          "retention": "warranty_period",
+          "purpose": "warranty_and_quality_monitoring",
+          "jurisdiction": ["EU", "EEA"]
+        },
+        {
+          "type": "diagnostic_code",
+          "granularity": "raw",
+          "retention": "warranty_period",
+          "purpose": "defect_analysis",
+          "jurisdiction": ["EU"]
+        }
+      ]
+    }
+  ],
+  "mandatory_retention": [
+    {
+      "type": "ecall",
+      "regulation": "EU_2015_758",
+      "treatment": "exempt_outside_boundary"
+    },
+    {
+      "type": "edr",
+      "regulation": "EU_General_Safety",
+      "treatment": "exempt_write_once_partition"
+    },
+    {
+      "type": "security_event_log",
+      "regulation": "R155",
+      "treatment": "declared_mandatory"
+    }
+  ]
+}
